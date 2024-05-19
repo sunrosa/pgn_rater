@@ -67,6 +67,7 @@ name = "pgn_rater"
 version = "0.1.0"
 dependencies = [
  "pgn-reader",
+ "skillratings",
  "thiserror",
 ]
 
@@ -98,6 +99,12 @@ dependencies = [
  "bitflags",
  "btoi",
 ]
+
+[[package]]
+name = "skillratings"
+version = "0.26.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0216316e163efbae956e5f2aa3ff715186119ab8ffc0e4862c46990e23083f6e"
 
 [[package]]
 name = "syn"
