@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+chrono = "0.4.38"
 pgn-reader = "0.26.0"
 skillratings = "0.26.0"
 thiserror = "1.0.61"
