@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use chrono::NaiveDate;
 use pgn::OutcomeResult;
 use pgn_reader::Color;
 use skillratings::glicko2::{self, Glicko2Config, Glicko2Rating};
@@ -13,6 +14,9 @@ fn main() {
     // Glicko-2 data
     let mut g2_players: HashMap<String, Glicko2Rating> = HashMap::new();
     let g2_config = Glicko2Config::new();
+
+    // Rating graph per player
+    let mut rating_graph: HashMap<String, HashMap<NaiveDate, f64>> = HashMap::new();
 
     // Actual data captured from PGN
     let mut games: Vec<OutcomeResult> = Vec::new();
@@ -43,13 +47,23 @@ fn main() {
 
     // Rate all games
     for game in games {
-        rate(game, &mut g2_players, g2_config);
+        rate(game.clone(), &mut g2_players, g2_config);
+
+        // Insert ratings into rating graph
+        rating_graph
+            .entry(game.white.clone())
+            .or_default()
+            .insert(game.date, g2_players.entry(game.white).or_default().rating);
+        rating_graph
+            .entry(game.black.clone())
+            .or_default()
+            .insert(game.date, g2_players.entry(game.black).or_default().rating);
     }
 
     // Sort players by rating descending and filter by RD
     let mut ratings_sorted = g2_players
         .into_iter()
-        .filter(|r| r.1.deviation < 200.)
+        .filter(|r| r.1.deviation < 180.)
         .collect::<Vec<_>>();
     ratings_sorted.sort_by(|a, b| b.1.rating.total_cmp(&a.1.rating));
 
@@ -57,6 +71,17 @@ fn main() {
     for rating in ratings_sorted {
         println!("{}: {} ({})", rating.0, rating.1.rating, rating.1.deviation);
     }
+
+    // Print my rating graph
+    let mut rating_graph_sorted: Vec<_> =
+        rating_graph.get("Sunrosa").unwrap().into_iter().collect();
+    rating_graph_sorted.sort_by(|a, b| a.0.cmp(&b.0));
+    println!(
+        "{}",
+        rating_graph_sorted
+            .into_iter()
+            .fold(String::new(), |a, b| format!("{a}\n{:?}: {}", b.0, b.1))
+    );
 }
 
 fn rate(
