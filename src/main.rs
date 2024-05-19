@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use chrono::NaiveDate;
 use pgn::OutcomeResult;
 use pgn_reader::Color;
 use skillratings::glicko2::{self, Glicko2Config, Glicko2Rating};
@@ -65,6 +64,7 @@ fn rate(
     g2_players: &mut HashMap<String, Glicko2Rating>,
     g2_config: Glicko2Config,
 ) {
+    // Win-loss-draw outcome (Fix this shit name lol)
     let wl = match outcome.outcome {
         pgn_reader::Outcome::Decisive { winner } => match winner {
             Color::White => skillratings::Outcomes::WIN,
@@ -73,6 +73,7 @@ fn rate(
         pgn_reader::Outcome::Draw => skillratings::Outcomes::DRAW,
     };
 
+    // Calculate the ratings
     let (w, b) = glicko2::glicko2(
         g2_players
             .get(&outcome.white)
@@ -84,6 +85,7 @@ fn rate(
         &g2_config,
     );
 
+    // Write the ratings
     g2_players.insert(outcome.white, w);
     g2_players.insert(outcome.black, b);
 }
