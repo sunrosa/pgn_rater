@@ -1,4 +1,4 @@
-use std::{borrow::Cow, fs::File, io::Read, str::Utf8Error};
+use std::{fs::File, str::Utf8Error};
 
 use pgn_reader::{BufferedReader, Visitor};
 
