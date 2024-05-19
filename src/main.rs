@@ -49,5 +49,10 @@ fn main() {
         }
     }
 
-    println!("{:?}", g2_players);
+    let mut ratings_sorted = g2_players.into_iter().collect::<Vec<_>>();
+    ratings_sorted.sort_by(|a, b| b.1.rating.total_cmp(&a.1.rating));
+
+    for rating in ratings_sorted {
+        println!("{}: {}", rating.0, rating.1.rating);
+    }
 }
