@@ -13,11 +13,11 @@ fn main() {
                     Ok(o) => {
                         println!("{:?}", o);
                     }
-                    Err(e) => println!("{}", e),
+                    Err(e) => println!("PGN error: {}", e),
                 },
                 None => break,
             },
-            Err(e) => println!("{}", e),
+            Err(e) => println!("IO error: {}", e),
         }
     }
 }
