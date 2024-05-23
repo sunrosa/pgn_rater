@@ -14,6 +14,10 @@ fn main() {
     // Glicko-2 data
     let mut g2_players: HashMap<String, Glicko2Rating> = HashMap::new();
     let g2_config = Glicko2Config::new();
+    let g2_default = Glicko2Rating {
+        rating: 1000.,
+        ..Default::default()
+    };
 
     // Rating graph per player
     let mut rating_graph: HashMap<String, HashMap<NaiveDate, f64>> = HashMap::new();
@@ -47,17 +51,17 @@ fn main() {
 
     // Rate all games
     for game in games {
-        rate(game.clone(), &mut g2_players, g2_config);
+        rate(game.clone(), &mut g2_players, g2_config, g2_default);
 
         // Insert ratings into rating graph
-        rating_graph
-            .entry(game.white.clone())
-            .or_default()
-            .insert(game.date, g2_players.entry(game.white).or_default().rating);
-        rating_graph
-            .entry(game.black.clone())
-            .or_default()
-            .insert(game.date, g2_players.entry(game.black).or_default().rating);
+        rating_graph.entry(game.white.clone()).or_default().insert(
+            game.date,
+            g2_players.entry(game.white).or_insert(g2_default).rating,
+        );
+        rating_graph.entry(game.black.clone()).or_default().insert(
+            game.date,
+            g2_players.entry(game.black).or_insert(g2_default).rating,
+        );
     }
 
     // Sort players by rating descending and filter by RD
@@ -88,6 +92,7 @@ fn rate(
     outcome: OutcomeResult,
     g2_players: &mut HashMap<String, Glicko2Rating>,
     g2_config: Glicko2Config,
+    g2_default: Glicko2Rating,
 ) {
     // Win-loss-draw outcome (Fix this shit name lol)
     let wl = match outcome.outcome {
@@ -100,12 +105,8 @@ fn rate(
 
     // Calculate the ratings
     let (w, b) = glicko2::glicko2(
-        g2_players
-            .get(&outcome.white)
-            .unwrap_or(&Glicko2Rating::default()),
-        g2_players
-            .get(&outcome.black)
-            .unwrap_or(&Glicko2Rating::default()),
+        g2_players.get(&outcome.white).unwrap_or(&g2_default),
+        g2_players.get(&outcome.black).unwrap_or(&g2_default),
         &wl,
         &g2_config,
     );
